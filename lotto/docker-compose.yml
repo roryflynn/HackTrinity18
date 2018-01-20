@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+    web:
+        image: nginx:latest
+        ports:
+            - "127.0.0.1:8004:80"
+        volumes:
+            - ./code:/code
+            - ./site.conf:/etc/nginx/conf.d/default.conf
+        networks:
+            - code-network
+    php:
+        build: .
+        volumes:
+            - ./code:/code
+            - ./javacode:/javacode
+        networks:
+            - code-network
+
+networks:
+    code-network:
+        driver: bridge
