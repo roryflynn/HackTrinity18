@@ -17,7 +17,7 @@
   <meta name="author" content="">
   <link rel="icon" href="../../favicon.ico">
 
-  <title>Trinity IT Helpdesk</title>
+  <title>Trinity EyeTee Helpdesk</title>
 
   <!-- Bootstrap core CSS -->
   <!-- Latest compiled and minified CSS -->
@@ -42,7 +42,7 @@
               <li role="presentation" class="active"><a href="/">Home</a></li>
             </ul>
           </nav>
-          <h3 class="text-muted">Trinity IT Helpdesk</h3>
+          <h3 class="text-muted">Trinity EyeTee Helpdesk</h3>
         </div>
 
         <div class="row marketing">
@@ -65,7 +65,7 @@
 
 
         <footer class="footer">
-          <p>&copy; HackTrinity '17. This is a fictional website. IT Services are actually a sound bunch of lads and lassies</p>
+          <p>&copy; HackTrinity '18. This is a fictional website.</p>
         </footer>
 
       </div> <!-- /container -->
