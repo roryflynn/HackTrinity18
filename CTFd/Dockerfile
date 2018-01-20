@@ -11,6 +11,6 @@ RUN pip install -r requirements.txt
 
 RUN chmod +x /opt/CTFd/docker-entrypoint.sh
 
-EXPOSE 4000
+EXPOSE 8000
 
 ENTRYPOINT ["/opt/CTFd/docker-entrypoint.sh"]

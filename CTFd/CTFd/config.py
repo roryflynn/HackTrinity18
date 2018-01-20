@@ -77,7 +77,7 @@ class Config(object):
     The default destination is the CTFd/uploads folder. If you need Amazon S3 files
     you can use the CTFd S3 plugin: https://github.com/ColdHeat/CTFd-S3-plugin
     '''
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
 
     '''
     TEMPLATES_AUTO_RELOAD specifies whether Flask should check for modifications to templates and
@@ -108,18 +108,32 @@ class Config(object):
     CACHE_TYPE specifies how CTFd should cache configuration values. If CACHE_TYPE is set to 'redis', CTFd will make use
     of the REDIS_URL specified in environment variables. You can also choose to hardcode the REDIS_URL here.
 
+    It is important that you specify some sort of cache as CTFd uses it to store values received from the database.
+
     CACHE_REDIS_URL is the URL to connect to Redis server.
-    Example: redis://user:password@localhost:6379/2.
+    Example: redis://user:password@localhost:6379
 
     http://pythonhosted.org/Flask-Caching/#configuring-flask-caching
     '''
-    CACHE_TYPE = "simple"
-    if CACHE_TYPE == 'redis':
-        CACHE_REDIS_URL = os.environ.get('REDIS_URL')
+    CACHE_REDIS_URL = os.environ.get('REDIS_URL')
+    if CACHE_REDIS_URL:
+        CACHE_TYPE = 'redis'
+    else:
+        CACHE_TYPE = 'simple'
+
+    '''
+    UPDATE_CHECK specifies whether or not CTFd will check whether or not there is a new version of CTFd
+    '''
+    UPDATE_CHECK = True
 
 
 class TestingConfig(Config):
+    SECRET_KEY = 'AAAAAAAAAAAAAAAAAAAA'
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     TESTING = True
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TESTING_DATABASE_URL') or 'sqlite://'
+    SERVER_NAME = 'localhost'
+    UPDATE_CHECK = False
+    CACHE_REDIS_URL = None
+    CACHE_TYPE = 'simple'

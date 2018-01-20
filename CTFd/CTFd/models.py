@@ -1,12 +1,14 @@
 import datetime
 import hashlib
 import json
-from socket import inet_aton, inet_ntoa
+import netaddr
+from socket import inet_pton, inet_ntop, AF_INET, AF_INET6
 from struct import unpack, pack, error as struct_error
 
 from flask_sqlalchemy import SQLAlchemy
 from passlib.hash import bcrypt_sha256
 from sqlalchemy.exc import DatabaseError
+from sqlalchemy.sql.expression import union_all
 
 
 def sha512(string):
@@ -14,15 +16,13 @@ def sha512(string):
 
 
 def ip2long(ip):
-    return unpack('!i', inet_aton(ip))[0]
+    '''Converts a user's IP address into an integer/long'''
+    return int(netaddr.IPAddress(ip))
 
 
 def long2ip(ip_int):
-    try:
-        return inet_ntoa(pack('!i', ip_int))
-    except struct_error:
-        # Backwards compatibility with old CTFd databases
-        return inet_ntoa(pack('!I', ip_int))
+    '''Converts a saved integer/long back into an IP address'''
+    return str(netaddr.IPAddress(ip_int))
 
 
 db = SQLAlchemy()
@@ -30,28 +30,21 @@ db = SQLAlchemy()
 
 class Pages(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    route = db.Column(db.String(80), unique=True)
+    auth_required = db.Column(db.Boolean)
+    title = db.Column(db.String(80))
+    route = db.Column(db.Text, unique=True)
     html = db.Column(db.Text)
+    draft = db.Column(db.Boolean)
 
-    def __init__(self, route, html):
+    def __init__(self, title, route, html, draft=True, auth_required=False):
+        self.title = title
         self.route = route
         self.html = html
+        self.draft = draft
+        self.auth_required = auth_required
 
     def __repr__(self):
-        return "<Pages {0} for challenge {1}>".format(self.tag, self.chal)
-
-
-class Containers(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
-    buildfile = db.Column(db.Text)
-
-    def __init__(self, name, buildfile):
-        self.name = name
-        self.buildfile = buildfile
-
-    def __repr__(self):
-        return "<Container ID:(0) {1}>".format(self.id, self.name)
+        return "<Pages route {0}>".format(self.route)
 
 
 class Challenges(db.Model):
@@ -61,16 +54,19 @@ class Challenges(db.Model):
     max_attempts = db.Column(db.Integer, default=0)
     value = db.Column(db.Integer)
     category = db.Column(db.String(80))
-    type = db.Column(db.Integer)
+    type = db.Column(db.String(80))
     hidden = db.Column(db.Boolean)
+    __mapper_args__ = {
+        'polymorphic_identity': 'standard',
+        'polymorphic_on': type
+    }
 
-    def __init__(self, name, description, value, category, type=0):
+    def __init__(self, name, description, value, category, type='standard'):
         self.name = name
         self.description = description
         self.value = value
         self.category = category
         self.type = type
-        # self.flags = json.dumps(flags)
 
     def __repr__(self):
         return '<chal %r>' % self.name
@@ -141,14 +137,14 @@ class Files(db.Model):
 class Keys(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     chal = db.Column(db.Integer, db.ForeignKey('challenges.id'))
-    key_type = db.Column(db.Integer)
+    type = db.Column(db.String(80))
     flag = db.Column(db.Text)
     data = db.Column(db.Text)
 
-    def __init__(self, chal, flag, key_type):
+    def __init__(self, chal, flag, type):
         self.chal = chal
         self.flag = flag
-        self.key_type = key_type
+        self.type = type
 
     def __repr__(self):
         return "<Flag {0} for challenge {1}>".format(self.flag, self.chal)
@@ -178,7 +174,7 @@ class Teams(db.Model):
 
     def score(self, admin=False):
         score = db.func.sum(Challenges.value).label('score')
-        team = db.session.query(Solves.teamid, score).join(Teams).join(Challenges).filter(Teams.banned == False, Teams.id == self.id)
+        team = db.session.query(Solves.teamid, score).join(Teams).join(Challenges).filter(Teams.id == self.id)
         award_score = db.func.sum(Awards.value).label('award_score')
         award = db.session.query(award_score).filter_by(teamid=self.id)
 
@@ -193,28 +189,72 @@ class Teams(db.Model):
         team = team.group_by(Solves.teamid).first()
         award = award.first()
 
-        if team:
+        if team and award:
             return int(team.score or 0) + int(award.award_score or 0)
+        elif team:
+            return int(team.score or 0)
+        elif award:
+            return int(award.award_score or 0)
         else:
             return 0
 
     def place(self, admin=False):
-        score = db.func.sum(Challenges.value).label('score')
-        quickest = db.func.max(Solves.date).label('quickest')
-        teams = db.session.query(Solves.teamid).join(Teams).join(Challenges).filter(Teams.banned == False)
+        """
+        This method is generally a clone of CTFd.scoreboard.get_standings.
+        The point being that models.py must be self-reliant and have little
+        to no imports within the CTFd application as importing from the
+        application itself will result in a circular import.
+        """
+        scores = db.session.query(
+            Solves.teamid.label('teamid'),
+            db.func.sum(Challenges.value).label('score'),
+            db.func.max(Solves.id).label('id'),
+            db.func.max(Solves.date).label('date')
+        ).join(Challenges).group_by(Solves.teamid)
+
+        awards = db.session.query(
+            Awards.teamid.label('teamid'),
+            db.func.sum(Awards.value).label('score'),
+            db.func.max(Awards.id).label('id'),
+            db.func.max(Awards.date).label('date')
+        ).group_by(Awards.teamid)
 
         if not admin:
             freeze = Config.query.filter_by(key='freeze').first()
             if freeze and freeze.value:
                 freeze = int(freeze.value)
                 freeze = datetime.datetime.utcfromtimestamp(freeze)
-                teams = teams.filter(Solves.date < freeze)
+                scores = scores.filter(Solves.date < freeze)
+                awards = awards.filter(Awards.date < freeze)
 
-        teams = teams.group_by(Solves.teamid).order_by(score.desc(), quickest).all()
+        results = union_all(scores, awards).alias('results')
+
+        sumscores = db.session.query(
+            results.columns.teamid,
+            db.func.sum(results.columns.score).label('score'),
+            db.func.max(results.columns.id).label('id'),
+            db.func.max(results.columns.date).label('date')
+        ).group_by(results.columns.teamid).subquery()
+
+        if admin:
+            standings_query = db.session.query(
+                Teams.id.label('teamid'),
+            )\
+                .join(sumscores, Teams.id == sumscores.columns.teamid) \
+                .order_by(sumscores.columns.score.desc(), sumscores.columns.id)
+        else:
+            standings_query = db.session.query(
+                Teams.id.label('teamid'),
+            )\
+                .join(sumscores, Teams.id == sumscores.columns.teamid) \
+                .filter(Teams.banned == False) \
+                .order_by(sumscores.columns.score.desc(), sumscores.columns.id)
+
+        standings = standings_query.all()
 
         # http://codegolf.stackexchange.com/a/4712
         try:
-            i = teams.index((self.id,)) + 1
+            i = standings.index((self.id,)) + 1
             k = i % 10
             return "%d%s" % (i, "tsnrhtdd"[(i / 10 % 10 != 1) * (k < 4) * k::4])
         except ValueError:
@@ -226,39 +266,41 @@ class Solves(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     chalid = db.Column(db.Integer, db.ForeignKey('challenges.id'))
     teamid = db.Column(db.Integer, db.ForeignKey('teams.id'))
-    ip = db.Column(db.Integer)
+    ip = db.Column(db.String(46))
     flag = db.Column(db.Text)
     date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     team = db.relationship('Teams', foreign_keys="Solves.teamid", lazy='joined')
     chal = db.relationship('Challenges', foreign_keys="Solves.chalid", lazy='joined')
     # value = db.Column(db.Integer)
 
-    def __init__(self, chalid, teamid, ip, flag):
-        self.ip = ip2long(ip)
+    def __init__(self, teamid, chalid, ip, flag):
+        self.ip = ip
         self.chalid = chalid
         self.teamid = teamid
         self.flag = flag
         # self.value = value
 
     def __repr__(self):
-        return '<solves %r>' % self.chal
+        return '<solve {}, {}, {}, {}>'.format(self.teamid, self.chalid, self.ip, self.flag)
 
 
 class WrongKeys(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     chalid = db.Column(db.Integer, db.ForeignKey('challenges.id'))
     teamid = db.Column(db.Integer, db.ForeignKey('teams.id'))
+    ip = db.Column(db.String(46))
     date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     flag = db.Column(db.Text)
     chal = db.relationship('Challenges', foreign_keys="WrongKeys.chalid", lazy='joined')
 
-    def __init__(self, teamid, chalid, flag):
+    def __init__(self, teamid, chalid, ip, flag):
+        self.ip = ip
         self.teamid = teamid
         self.chalid = chalid
         self.flag = flag
 
     def __repr__(self):
-        return '<wrong %r>' % self.flag
+        return '<wrong {}, {}, {}, {}>'.format(self.teamid, self.chalid, self.ip, self.flag)
 
 
 class Unlocks(db.Model):
@@ -279,12 +321,12 @@ class Unlocks(db.Model):
 
 class Tracking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    ip = db.Column(db.BigInteger)
+    ip = db.Column(db.String(46))
     team = db.Column(db.Integer, db.ForeignKey('teams.id'))
     date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     def __init__(self, ip, team):
-        self.ip = ip2long(ip)
+        self.ip = ip
         self.team = team
 
     def __repr__(self):
