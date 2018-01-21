@@ -96,7 +96,7 @@ $priv = require_login();
 
 
           <footer class="footer">
-            <p>&copy; HackTrinity '17. This is a fictional website.</p>
+            <p>&copy; HackTrinity '18. This is a fictional website.</p>
           </footer>
 
         </div> <!-- /container -->

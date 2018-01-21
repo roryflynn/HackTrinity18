@@ -8,7 +8,6 @@ if(isset($_COOKIE['auth'])) {
   if(isset($_POST['username'])) {
     if($_POST['username'] === "student1" && $_POST['password'] === "password1") {
       setcookie('auth','student1:password1:staff=false', time() + (1 * 24 * 60 * 60));
-      $_SESSION['grade'] = 38;
 
       header("Location: index.php");
       exit();
@@ -82,7 +81,7 @@ if(isset($_COOKIE['auth'])) {
           </form>
         </div>
           <footer class="footer">
-            <p>&copy; HackTrinity '17. This is a fictional website.</p>
+            <p>&copy; HackTrinity '18. This is a fictional website.</p>
           </footer>
 
         </div> <!-- /container -->

@@ -3,6 +3,10 @@ session_start();
 require 'resources.php';
 $priv = require_login();
 
+if(!isset($_SESSION['grade'])){
+  $_SESSION['grade'] = 38;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -118,7 +122,7 @@ if ($priv === "staff=true") {
 
 
           <footer class="footer">
-            <p>&copy; HackTrinity '17. This is a fictional website.</p>
+            <p>&copy; HackTrinity '18. This is a fictional website.</p>
           </footer>
 
         </div> <!-- /container -->
