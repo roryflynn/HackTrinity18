@@ -2,6 +2,9 @@
 session_start();
 require 'resources.php';
 $priv = require_login();
+if(!isset($_SESSION['grade'])){
+  $_SESSION['grade'] = 38;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
