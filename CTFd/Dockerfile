@@ -2,6 +2,9 @@ FROM python:2.7-alpine
 RUN apk update && \
     apk add python python-dev libffi-dev gcc make musl-dev py-pip mysql-client
 
+#RUN apk update && \
+#    apk add python python-dev libffi-dev gcc make musl-dev py-pip postgresql-client postgresql-dev
+
 RUN mkdir -p /opt/CTFd
 COPY . /opt/CTFd
 WORKDIR /opt/CTFd

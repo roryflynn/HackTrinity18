@@ -58,6 +58,7 @@ def get_standings(admin=False, count=None):
         standings_query = db.session.query(
             Teams.id.label('teamid'),
             Teams.name.label('name'),
+            Teams.is_first_year,
             Teams.banned, sumscores.columns.score
         )\
             .join(sumscores, Teams.id == sumscores.columns.teamid) \
@@ -66,6 +67,7 @@ def get_standings(admin=False, count=None):
         standings_query = db.session.query(
             Teams.id.label('teamid'),
             Teams.name.label('name'),
+            Teams.is_first_year,
             sumscores.columns.score
         )\
             .join(sumscores, Teams.id == sumscores.columns.teamid) \
@@ -91,6 +93,7 @@ def scoreboard_view():
     if utils.hide_scores():
         return render_template('scoreboard.html', errors=['Scores are currently hidden'])
     standings = get_standings()
+
     return render_template('scoreboard.html', teams=standings, score_frozen=utils.is_scoreboard_frozen())
 
 

@@ -137,6 +137,23 @@ def admin_team(teamid):
             db.session.close()
             return jsonify({'data': ['success']})
 
+        is_tcd_student = request.form.get('is_tcd_student', None)
+        if is_tcd_student:
+            is_tcd_student = True if is_tcd_student == 'true' else False
+            user.is_tcd_student = is_tcd_student
+            user.banned = not (is_tcd_student)
+            db.session.commit()
+            db.session.close()
+            return jsonify({'data': ['success']})
+
+        is_first_year = request.form.get('is_first_year', None)
+        if is_first_year:
+            is_first_year = True if is_first_year == 'true' else False
+            user.is_first_year = is_first_year
+            db.session.commit()
+            db.session.close()
+            return jsonify({'data': ['success']})              
+
         name = request.form.get('name', None)
         password = request.form.get('password', None)
         email = request.form.get('email', None)

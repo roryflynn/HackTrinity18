@@ -164,10 +164,20 @@ class Teams(db.Model):
     admin = db.Column(db.Boolean, default=False)
     joined = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
-    def __init__(self, name, email, password):
+    ## HackTrinity Specific Fields ##
+    is_tcd_student = db.Column(db.Boolean, default=False)
+    is_first_year = db.Column(db.Boolean, default=False)
+
+
+    def __init__(self, name, email, password, is_tcd_student=False, is_first_year=False):
         self.name = name
         self.email = email
         self.password = bcrypt_sha256.encrypt(str(password))
+        self.is_tcd_student = is_tcd_student
+        self.is_first_year = is_first_year
+
+        ## If the user is not a TCD student, don't show them on the scoreboard ##
+        self.banned = not (is_tcd_student)
 
     def __repr__(self):
         return '<team %r>' % self.name

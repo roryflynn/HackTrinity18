@@ -126,8 +126,8 @@ def static_html(template):
         return render_template('page.html', content=markdown(page.html))
 
 
-@views.route('/teams', defaults={'page': '1'})
-@views.route('/teams/<int:page>')
+@views.route('/players', defaults={'page': '1'})
+@views.route('/players/<int:page>')
 def teams(page):
     if utils.get_config('workshop_mode'):
         abort(404)
@@ -146,7 +146,7 @@ def teams(page):
     return render_template('teams.html', teams=teams, team_pages=pages, curr_page=page)
 
 
-@views.route('/team', methods=['GET'])
+@views.route('/player', methods=['GET'])
 def private_team():
     if utils.authed():
         teamid = session['id']
@@ -173,7 +173,7 @@ def private_team():
         return redirect(url_for('auth.login'))
 
 
-@views.route('/team/<int:teamid>', methods=['GET', 'POST'])
+@views.route('/player/<int:teamid>', methods=['GET', 'POST'])
 def team(teamid):
     if utils.get_config('workshop_mode'):
         abort(404)
@@ -282,10 +282,11 @@ def profile():
             website = user.website
             affiliation = user.affiliation
             country = user.country
+            is_first_year = user.is_first_year
             prevent_name_change = utils.get_config('prevent_name_change')
             confirm_email = utils.get_config('verify_emails') and not user.verified
             return render_template('profile.html', name=name, email=email, website=website, affiliation=affiliation,
-                                   country=country, prevent_name_change=prevent_name_change, confirm_email=confirm_email)
+                                   country=country, prevent_name_change=prevent_name_change, is_first_year=is_first_year, confirm_email=confirm_email)
     else:
         return redirect(url_for('auth.login'))
 

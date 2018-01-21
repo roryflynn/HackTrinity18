@@ -38,7 +38,7 @@
 				<thead>
 					<tr>
 						<td scope="col" width="10px"><b>Place</b></td>
-						<td scope="col"><b>Team</b></td>
+						<td scope="col"><b>Name</b></td>
 						<td scope="col"><b>Score</b></td>
 					</tr>
 				</thead>
@@ -46,7 +46,7 @@
 				{% for team in teams %}
 					<tr>
 						<th scope="row" class="text-center">{{ loop.index }}</th>
-						<td><a href="{{ request.script_root }}/team/{{ team.teamid }}">{{ team.name }}</a></td>
+						<td><a href="{{ request.script_root }}/player/{{ team.teamid }}">{{ team.name }}</a> {% if team.is_first_year %}<span class="badge badge-primary"">1st Yr</span>{%endif%}</td>
 						<td>{{ team.score }}</td>
 					</tr>
 				{% endfor %}

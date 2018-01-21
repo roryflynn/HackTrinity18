@@ -145,6 +145,14 @@ def register():
         email = request.form['email']
         password = request.form['password']
 
+        ## HackTrinity specific logic ##
+
+        is_tcd_student = request.form.get('is_tcd_student', None) != None
+        is_first_year = request.form.get('is_first_year', None) != None
+
+        logger = logging.getLogger('reqs')
+        logger.warn([is_tcd_student, is_first_year])
+
         name_len = len(name) == 0
         names = Teams.query.add_columns('name', 'id').filter_by(name=name).first()
         emails = Teams.query.add_columns('email', 'id').filter_by(email=email).first()
@@ -172,7 +180,7 @@ def register():
             return render_template('register.html', errors=errors, name=request.form['name'], email=request.form['email'], password=request.form['password'])
         else:
             with app.app_context():
-                team = Teams(name, email.lower(), password)
+                team = Teams(name, email.lower(), password, is_tcd_student=is_tcd_student, is_first_year=is_first_year)
                 db.session.add(team)
                 db.session.commit()
                 db.session.flush()

@@ -22,7 +22,7 @@
 			<form method="post" accept-charset="utf-8" autocomplete="off" role="form" class="form-horizontal">
 				<div class="form-group">
 					<label for="name-input">
-						Team Name
+						Full Name
 					</label>
 					<input class="form-control" type="text" name="name" id="name-input" {% if name %}value="{{ name }}"{% endif %} />
 				</div>
@@ -37,6 +37,20 @@
 						Password
 					</label>
 					<input class="form-control" type="password" name="password" id="password-input" {% if password %}value="{{ password }}"{% endif %}/>
+				</div>
+				<hr>
+				<h5>Prize Eligibility</h5>
+				<div class="form-check">
+					<label class="form-check-label">
+						<input class="form-check-input" type="checkbox" name="is_tcd_student" value="yes">
+						I am currently a taught undergrad or taught postgrad at TCD
+					</label>
+				</div>
+				<div class="form-check disabled">
+					<label class="form-check-label">
+						<input class="form-check-input" type="checkbox" name="is_first_year" value="yes">
+						I am currently in my 1st year of ICS, CSL, CSB or MSISS
+					</label>
 				</div>
 				<div class="row pt-3">
 					<div class="col-md-12">

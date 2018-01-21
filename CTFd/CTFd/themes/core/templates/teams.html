@@ -6,7 +6,7 @@
 {% block content %}
 <div class="jumbotron">
 	<div class="container">
-		<h1>Teams</h1>
+		<h1>Players</h1>
 	</div>
 </div>
 <div class="container">
@@ -15,7 +15,7 @@
 			<table class="table table-striped">
 				<thead>
 					<tr>
-						<td><b>Team</b></td>
+						<td><b>Player Name</b></td>
 						<td><b>Website</b></td>
 						<td class="d-none d-md-table-cell d-lg-table-cell"><b>Affiliation</b></td>
 						<td class="d-none d-md-table-cell d-lg-table-cell"><b>Country</b></td>
@@ -28,7 +28,7 @@
 						{% if hide_scores() %}
 							<span>{{ team.name | truncate(50) }}</span>
 						{% else %}
-							<a href="{{ request.script_root }}/team/{{ team.id }}">{{ team.name }}</a>
+							<a href="{{ request.script_root }}/player/{{ team.id }}">{{ team.name }}</a>
 						{% endif %}
 						</td>
 						<td class="text-center" style="width: 10px;">
@@ -66,19 +66,19 @@
 			<div class="text-center">Page
 				<br>
 				{% if curr_page != 1 %}
-					<a href="{{ request.script_root }}/teams/{{ curr_page-1 }}">
+					<a href="{{ request.script_root }}/players/{{ curr_page-1 }}">
 						&lt;&lt;&lt;
 					</a>
 				{% endif %}
 				{% for page in range(1, team_pages + 1) %}
 					{% if curr_page != page %}
-						<a href="{{ request.script_root }}/teams/{{ page }}">{{ page }}</a>
+						<a href="{{ request.script_root }}/players/{{ page }}">{{ page }}</a>
 					{% else %}
 						<b>{{page}}</b>
 					{% endif %}
 				{% endfor %}
 				{% if curr_page != team_pages %}
-					<a href="{{ request.script_root }}/teams/{{ curr_page + 1 }}">
+					<a href="{{ request.script_root }}/players/{{ curr_page + 1 }}">
 						&gt;&gt;&gt;
 					</a>
 				{% endif %}
