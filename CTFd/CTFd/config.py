@@ -40,7 +40,14 @@ class Config(object):
     '''
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+
     '''
+    #HackTrinity try to solve the database connection timeout
+
+    '''
+    SQLALCHEMY_POOL_RECYCLE = 180
+    '''
+
     SESSION_TYPE is a configuration value used for Flask-Session. It is currently unused in CTFd.
     http://pythonhosted.org/Flask-Session/#configuration
     '''
