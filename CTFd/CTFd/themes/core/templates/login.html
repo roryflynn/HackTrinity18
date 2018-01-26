@@ -22,7 +22,7 @@
 			<form method="post" accept-charset="utf-8" autocomplete="off" role="form" class="form-horizontal">
 				<div class="form-group">
 					<label for="name-input">
-						Team Name or Email
+						Email
 					</label>
 					<input class="form-control" type="text" name="name" id="name-input" />
 				</div>
@@ -34,9 +34,9 @@
 				</div>
 				<div class="row pt-3">
 					<div class="col-md-6">
-						<a class="float-left align-text-to-button" href="{{ request.script_root }}/reset_password">
+<!-- 						<a class="float-left align-text-to-button" href="{{ request.script_root }}/reset_password">
 							Forgot your password?
-						</a>
+						</a> -->
 					</div>
 					<div class="col-md-6">
 						<button type="submit" id="submit" tabindex="5" class="btn btn-md btn-primary btn-outlined float-right">
@@ -44,6 +44,7 @@
 						</button>
 					</div>
 				</div>
+				<p>Haven't signed up yet? <a href="/register">Register here</a></p>
 				<input type="hidden" name="nonce" value="{{ nonce }}">
 			</form>
 		</div>

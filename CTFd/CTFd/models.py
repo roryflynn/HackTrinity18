@@ -152,7 +152,8 @@ class Keys(db.Model):
 
 class Teams(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128), unique=True)
+    ## HackTrinity - allow people with the same name to compete!
+    name = db.Column(db.String(128), unique=False)
     email = db.Column(db.String(128), unique=True)
     password = db.Column(db.String(128))
     website = db.Column(db.String(128))

@@ -150,11 +150,10 @@ def register():
         is_tcd_student = request.form.get('is_tcd_student', None) != None
         is_first_year = request.form.get('is_first_year', None) != None
 
-        logger = logging.getLogger('reqs')
-        logger.warn([is_tcd_student, is_first_year])
 
         name_len = len(name) == 0
-        names = Teams.query.add_columns('name', 'id').filter_by(name=name).first()
+        ## HackTrinity - People sometimes have the same name
+        #names = Teams.query.add_columns('name', 'id').filter_by(name=name).first()
         emails = Teams.query.add_columns('email', 'id').filter_by(email=email).first()
         pass_short = len(password) == 0
         pass_long = len(password) > 128
@@ -163,10 +162,10 @@ def register():
 
         if not valid_email:
             errors.append("Please enter a valid email address")
-        if names:
-            errors.append('That team name is already taken')
+        # if names:
+        #     errors.append('That team name is already taken')
         if team_name_email_check is True:
-            errors.append('Your team name cannot be an email address')
+            errors.append('Your name cannot be an email address')
         if emails:
             errors.append('That email has already been used')
         if pass_short:
@@ -174,7 +173,7 @@ def register():
         if pass_long:
             errors.append('Pick a shorter password')
         if name_len:
-            errors.append('Pick a longer team name')
+            errors.append('Pick a longer name')
 
         if len(errors) > 0:
             return render_template('register.html', errors=errors, name=request.form['name'], email=request.form['email'], password=request.form['password'])
@@ -225,11 +224,13 @@ def login():
         errors = []
         name = request.form['name']
 
-        # Check if the user submitted an email address or a team name
-        if utils.check_email_format(name) is True:
-            team = Teams.query.filter_by(email=name).first()
-        else:
-            team = Teams.query.filter_by(name=name).first()
+        # # Check if the user submitted an email address or a team name
+        # if utils.check_email_format(name) is True:
+
+        ## HackTrinity - only allow login by email    
+        team = Teams.query.filter_by(email=name).first()
+        # else:
+        #     team = Teams.query.filter_by(name=name).first()
 
         if team:
             if team and bcrypt_sha256.verify(request.form['password'], team.password):
@@ -259,7 +260,7 @@ def login():
                     ip=utils.get_ip(),
                     username=team.name.encode('utf-8')
                 ))
-                errors.append("Your username or password is incorrect")
+                errors.append("Your email or password is incorrect")
                 db.session.close()
                 return render_template('login.html', errors=errors)
 
@@ -268,7 +269,7 @@ def login():
                 date=time.strftime("%m/%d/%Y %X"),
                 ip=utils.get_ip()
             ))
-            errors.append("Your username or password is incorrect")
+            errors.append("Your email or password is incorrect")
             db.session.close()
             return render_template('login.html', errors=errors)
 
