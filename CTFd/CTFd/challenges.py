@@ -204,7 +204,9 @@ def solves(teamid=None):
             solves = Solves.query.filter_by(teamid=session['id']).all()
         elif utils.user_can_view_challenges():
             if utils.authed():
-                solves = Solves.query.join(Teams, Solves.teamid == Teams.id).filter(Solves.teamid == session['id'], Teams.banned == False).all()
+                #solves = Solves.query.join(Teams, Solves.teamid == Teams.id).filter(Solves.teamid == session['id'], Teams.banned == False).all()
+                ## HackTrinity: Allow non-TCD to see challenges they've solved
+                solves = Solves.query.join(Teams, Solves.teamid == Teams.id).filter(Solves.teamid == session['id']).all()
             else:
                 return jsonify({'solves': []})
         else:
