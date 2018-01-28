@@ -72,9 +72,9 @@ if(isset($_SESSION['username'])) {
 		  <p><strong>Password:</strong> test</p>
 		  <br/>
 		  <form method="post" action="login.php">
-			  <input type="text" class="form-control" name="username" placeholder="Username" required="" autofocus="" style="width:40%" />
+			  <input type="text" class="form-control" name="username" placeholder="Username" autofocus="" style="width:40%" />
 			  <br/>
-			  <input type="password" class="form-control" name="password" placeholder="Password" required="" style="width:40%"/>
+			  <input type="password" class="form-control" name="password" placeholder="Password" style="width:40%"/>
 			  <br/>
 			  <button class="btn btn-md btn-primary" type="submit">Login</button>
 			  <a href="reset.php"><button class="btn btn-md btn-danger">Forgot password</button></a>
