@@ -21,6 +21,8 @@ if(isset($_SESSION['username'])) {
 					$stmt = $conn->prepare("UPDATE users SET password = ? WHERE username = ?");
 					$stmt->execute([sha1(trim($_POST['password'])),trim($_POST['username'])]);
 					$pass_changed = true;
+				} else {
+					$pass_changed = false;
 				}
 			}
 			else {
@@ -106,9 +108,15 @@ if(isset($_SESSION['username'])) {
 			  <p><strong>User doesn\'t exist!</strong> Please try again.</p>
 			</div>';
 		} elseif(isset($pass_changed)){
-			echo '<div class="alert alert-success">
-			  <p><strong>Password change successful!</p>
-			</div>';
+			if($pass_changed === true) {
+				echo '<div class="alert alert-success">
+				  <p><strong>Password change successful!</p>
+				</div>';
+			} else {
+				echo '<div class="alert alert-danger">
+				  <p><strong>Reset code incorrect!</p>
+				</div>';
+			}
 		} elseif(isset($reset_code_sent)){
 			echo '<div class="alert alert-success">
 			  <p><strong>Reset code emailed to '.htmlentities($_POST['username']).'</p>
@@ -126,10 +134,10 @@ if(isset($_SESSION['username'])) {
 		<br/>
 		<form method="post" action="reset.php">
 			<input type="text" class="form-control" name="username" placeholder="Username" required="" autofocus="" style="width:40%" />
-			<input type="password" class="form-control" name="password" placeholder="Password" required="" style="width:40%"/>
+			<input type="password" class="form-control" name="password" placeholder="New Password" required="" style="width:40%"/>
 			<input type="text" class="form-control" name="resetcode" placeholder="0000" required="" autofocus="" style="width:40%" />
 			<br/>
-			<button class="btn btn-md btn-primary" type="submit">Send Reset Code</button>
+			<button class="btn btn-md btn-primary" type="submit">Change Password</button>
 		</form>
 		</div>
 		<footer class="footer">

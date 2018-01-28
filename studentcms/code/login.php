@@ -77,8 +77,8 @@ if(isset($_SESSION['username'])) {
 			  <input type="password" class="form-control" name="password" placeholder="Password" style="width:40%"/>
 			  <br/>
 			  <button class="btn btn-md btn-primary" type="submit">Login</button>
-			  <a href="reset.php"><button class="btn btn-md btn-danger">Forgot password</button></a>
-			  <a href="register.php"><button class="btn btn-md btn-success">Register</button></a>
+			  <a href="reset.php"><button class="btn btn-md btn-danger" onclick="window.location='/reset.php'; return false;">Forgot password</button></a>
+			  <a href="register.php"><button class="btn btn-md btn-success" onclick="window.location='/register.php'; return false;">Register</button></a>
 		  </form>
 		</div>
 		<footer class="footer">

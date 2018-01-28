@@ -4,24 +4,24 @@ services:
     web:
         image: nginx:latest
         ports:
-            - "127.0.0.1:8001:80"
+            - "127.0.0.1:8010:80"
         volumes:
-            - ./code:/code
-            - ./site.conf:/etc/nginx/conf.d/default.conf
+            - ./code:/code:ro
+            - ./site.conf:/etc/nginx/conf.d/default.conf:ro
         networks:
             - code-network
     php:
         build: .
         image: php:fpm
         volumes:
-            - ./code:/code
+            - ./code:/code:ro
         networks:
             - code-network
     db:
         image: mysql:latest
         restart: always
         volumes:
-            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
         environment:
             MYSQL_DATABASE: tidal
             MYSQL_USER: tidal
