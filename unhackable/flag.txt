@@ -1,1 +1,1 @@
-HackTrinity{your_encryption_is_only_as_strong_as_your_key_space}
+HackTrinity{hidden_git_directorys_gonna_git_ya}
